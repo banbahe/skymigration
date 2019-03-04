@@ -1,0 +1,94 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace skymigration
+{
+    public class Activity
+    {
+        public int activityId { get; set; }
+        public string resourceId { get; set; }
+        public string timeSlot { get; set; }
+        public string date { get; set; }
+        public string apptNumber { get; set; }
+        public string recordType { get; set; }
+        public string status { get; set; }
+        public string activityType { get; set; }
+        public string workZone { get; set; }
+        public int duration { get; set; }
+        public string travelTime { get; set; }
+
+        public string customerName { get; set; }
+        public string customerNumber { get; set; }
+        public string customerPhone { get; set; }
+        public string customerEmail { get; set; }
+        public string customerCell { get; set; }
+        public string streetAddress { get; set; }
+        public string city { get; set; }
+        public string postalCode { get; set; }
+        public string stateProvince { get; set; }
+        public string language { get; set; }
+        public string languageISO { get; set; }
+        public string reminderTime { get; set; }
+        public string timeZone { get; set; }
+        public string timeZoneIANA { get; set; }
+
+        public float longitude { get; set; }
+
+
+        public float latitude { get; set; }
+        public string slaWindowStart { get; set; }
+        public string slaWindowEnd { get; set; }
+        public string timeOfBooking { get; set; }
+        public string timeOfAssignment { get; set; }
+
+        public string deliveryWindowStart { get; set; }
+        public string deliveryWindowEnd { get; set; }
+        public string startTime { get; set; }
+        public string endTime { get; set; }
+        public string positionInRoute { get; set; }
+
+        public string resourceTimeZone { get; set; }
+        public string resourceTimeZoneIANA { get; set; }
+        public string resourceTimeZoneDiff { get; set; }
+        public string country_code { get; set; }
+        public string serviceWindowStart { get; set; }
+        public string serviceWindowEnd { get; set; }
+
+        // custom property
+        public string XA_TipoCliente { get; set; }
+        public string XA_TipoCuenta { get; set; }
+        public string XA_Contrato { get; set; }
+        public string XA_NumeroExterior { get; set; }
+        public string XA_Colonia { get; set; }
+        public string XA_Municipio { get; set; }
+        public string XA_EntreCalle1 { get; set; }
+        public string XA_EntreCalle2 { get; set; }
+        public string XA_CodAreaTel1 { get; set; }
+        public string XA_CodAreaTel3 { get; set; }
+        public string XA_Telefono3 { get; set; }
+        public string XA_FlagMdu { get; set; }
+        public string XA_AreaServicio { get; set; }
+        public string XA_TipoServicio { get; set; }
+        public string XA_SubtipoServicio { get; set; }
+        public string XA_Prioridad { get; set; }
+        public string XA_ClaveCapturaVenta { get; set; }
+        public string XA_Paquete { get; set; }
+        public string XA_Promocion { get; set; }
+        public string XA_SubtipoCliente { get; set; }
+        public string XA_CanalVenta { get; set; }
+        public string XA_Zona { get; set; }
+        public string XA_saldo_cuenta { get; set; }
+        public string XA_fecha_rec { get; set; }
+        public string XA_saldo_penalizado { get; set; }
+        public string XA_tipo_de_plazo { get; set; }
+
+        public string XA_NumeroInterior { get; set; }
+        public string XA_CodAreaTel2 { get; set; }
+        public string XA_Telefono2 { get; set; }
+        public string XA_ComentariosDireccion { get; set; }
+
+    }
+}

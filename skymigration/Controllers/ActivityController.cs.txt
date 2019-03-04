@@ -1,0 +1,139 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+
+namespace skymigration
+{
+    public class ActivityController : IActivity
+    {
+        private Dictionary<string, int> dictionary = new Dictionary<string, int>();
+        private string source { get; set; }
+        private async Task<List<string>> LinesFileAsync()
+        {
+            List<string> listResult = new List<string>();
+
+            using (var reader = new StreamReader(this.source))
+            {
+                while (!reader.EndOfStream)
+                {
+                    var line = await reader.ReadLineAsync();
+                    listResult.Add(line);
+                }
+            }
+            return listResult;
+        }
+        private List<string> ReadCSV(string path)
+        {
+            this.source = path;
+            List<string> list = new List<string>();
+            var files = new FileInfo(path);
+            Task<List<string>> task = this.LinesFileAsync();
+            task.Wait();
+            var result = task.Result;
+            list.AddRange(result);
+            return list;
+        }
+
+        private List<Activity> FillList(List<string> lines)
+        {
+
+            List<string> listActivity = new List<string>();
+            string[] objectDefinition = new string[100];
+            try
+            {
+                for (int i = 0; i < lines.Count; i++)
+                {
+
+                    string tmpActivity = "{";
+
+                    if (i == 0)
+                    {
+                        objectDefinition = lines[0].Split(';');
+                        var tuple = Tuple.Create("cat", 2, true);
+                    }
+                    else
+                    {
+                        string[] tmpObject = lines[i].Split(';');
+
+                        for (int j = 0; j < tmpObject.Length; j++)
+                        {
+                            if (!string.IsNullOrEmpty(tmpObject[j]))
+                            {
+                                string tmpkey = objectDefinition[j].ToString().Trim();
+                                string tmpvalue = tmpObject[j].ToString().Trim();
+                                tmpActivity = string.Concat(tmpActivity, "'", tmpkey, "' : '", tmpvalue, "',");
+                                // tmpActivity = string.Format(tmpActivity, "{0} : {1} ,", tmpkey, tmpvalue);
+                            }
+                        }
+                        tmpActivity = string.Concat(tmpActivity, "}");
+                        tmpActivity = tmpActivity.Replace(",}", string.Empty);
+                        listActivity.Add(tmpActivity);
+
+                    }
+
+                    //if (i == 0)
+                    //{
+                    //    Activity activityInfo = new Activity();
+                    //    int idtmp = 0;
+                    //    string[] tmpproperties = lines[0].Split(';');
+                    //    foreach (var item in tmpproperties)
+                    //    {
+
+                    //    }
+
+                    //    //foreach (var prop in activityInfo.GetType().GetProperties())
+                    //    //{
+                    //    //    dictionary.Add(prop.Name, idtmp);
+                    //    //    idtmp = idtmp + 1;
+                    //    //}
+                    //}
+                    //else
+                    //{
+                    //    Activity activity = new Activity();
+                    //    activity.activityId =  
+                    //}
+
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+            return null;
+        }
+
+        public List<Activity> GetFromCSV(string path)
+        {
+            try
+            {
+                List<string> listCSVLines = ReadCSV(path);
+                FillList(listCSVLines);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return null;
+        }
+
+        public bool Create(Activity activity)
+        {
+            try
+            {
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return true;
+        }
+    }
+}
