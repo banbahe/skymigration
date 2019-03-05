@@ -81,7 +81,7 @@ namespace skymigration
     /// 71	XA_mov_tipo_eq
     /// 72	XA_red
     /// </summary>
-    public class Activity 
+    public class Activity
     {
         public int activityId { get; set; }
         public string apptNumber { get; set; }
@@ -99,8 +99,30 @@ namespace skymigration
         public string country_code { get; set; }
         public float longitude { get; set; }
         public float latitude { get; set; }
-        public string slaWindowStart { get; set; }
-        public string slaWindowEnd { get; set; }
+        private string SlaWindowStart;
+        public string slaWindowStart
+        {
+            get { return SlaWindowStart; }
+            set
+            {
+                if (value.Trim().Length == 16)
+                    SlaWindowStart = string.Concat(value.Trim(), ":00");
+                else
+                    SlaWindowStart = value;
+            }
+        }
+        private string SlaWindowEnd;
+        public string slaWindowEnd
+        {
+            get { return SlaWindowEnd; }
+            set
+            {
+                if (value.Trim().Length == 16)
+                    SlaWindowEnd = string.Concat(value.Trim(), ":00");
+                else
+                    SlaWindowEnd = value;
+            }
+        }
         public string postalCode { get; set; }
         public string stateProvince { get; set; }
         public int points { get; set; }

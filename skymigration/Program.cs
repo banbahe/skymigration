@@ -4,6 +4,8 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Configuration;
+using System.Threading.Tasks;
+
 namespace skymigration
 {
     enum TypeLog
@@ -30,13 +32,24 @@ namespace skymigration
             List<Activity> list = ctrlActivity.GetFromCSV(CurrentFilePath);
 
             int count = 0;
+            int activity_ok = 0;
+            int activity_bad = 1;
+
+            //Parallel.ForEach(list, item =>
+            //{
+            //    ctrlActivity.Create(item);
+            //});
+
             foreach (var item in list)
             {
                 Console.Clear();
                 Console.WriteLine(string.Format("{0} de un total de {1} Actividades", count += 1, list.Count));
-                ctrlActivity.Create(item);
+                var response = ctrlActivity.Create(item);
+                if (response == null)
+                    activity_bad += 1;
+                else
+                    activity_ok += 1;
             }
-
 
             Program.Logger(string.Format(" Fin de proceso {0} ", DateTime.Now), TypeLog.DEFAULT);
             Program.Logger(string.Format("******************************"), TypeLog.DEFAULT);

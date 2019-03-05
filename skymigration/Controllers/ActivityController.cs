@@ -14,9 +14,10 @@ namespace skymigration
         public string Authorization { get; set; } = ConfigurationManager.AppSettings["currentenviroment"].ToString();
         private string source { get; set; }
 
-   
+
         public Activity Create(Activity activity)
         {
+            Program.Logger(string.Format("|{0}|apptNumber:{1}|resourceId:{2}|", DateTime.Now, activity.apptNumber, activity.resourceId), TypeLog.DEFAULT);
             Activity responseActivity = new Activity();
             string jsonActivy = JsonConvert.SerializeObject(activity, Formatting.None);
 
@@ -35,6 +36,26 @@ namespace skymigration
             return responseActivity;
         }
 
+        public Activity Exist(Activity activity)
+        {
+            Program.Logger(string.Format("|{0}|apptNumber:{1}|resourceId:{2}|", DateTime.Now, activity.apptNumber, activity.resourceId), TypeLog.DEFAULT);
+            Activity responseActivity = new Activity();
+            string jsonActivy = JsonConvert.SerializeObject(activity, Formatting.None);
+
+            ResponseOFSC result = UtilWebRequest.SendWayAsync("rest/ofscCore/v1/activities", enumMethod.POST, jsonActivy, Authorization);
+            result.Content = result.Content.Replace("\n", string.Empty);
+
+            if (result.statusCode >= 200 && result.statusCode < 300)
+            {
+                responseActivity = JsonConvert.DeserializeObject<Activity>(result.Content);
+                Program.Logger(string.Format("|{0}|apptNumber:{1},activityId:{2},resource_id:{3}|{4}|", DateTime.Now, responseActivity.apptNumber, responseActivity.activityId, responseActivity.resourceId, result.Content), TypeLog.OK_REST_ACTIVITY);
+            }
+
+            else
+                Program.Logger(string.Format("|{0}|apptNumber:{1},resource_id:{2}|{3}|", DateTime.Now, activity.apptNumber, activity.resourceId, result.Content), TypeLog.BAD_REST_ACTIVITY);
+
+            return responseActivity;
+        }
         public List<Activity> GetFromCSV(string path)
         {
             List<string> listCSVLines = ReadCSV(path);
@@ -76,8 +97,8 @@ namespace skymigration
                         activity.country_code = tmpExtractInfoforActivity[12];
                         activity.longitude = string.IsNullOrEmpty(tmpExtractInfoforActivity[13]) ? 0 : float.Parse(tmpExtractInfoforActivity[13]);
                         activity.latitude = string.IsNullOrEmpty(tmpExtractInfoforActivity[14]) ? 0 : float.Parse(tmpExtractInfoforActivity[14]); ;
-                        activity.slaWindowStart = tmpExtractInfoforActivity[15];
-                        activity.slaWindowEnd = tmpExtractInfoforActivity[16];
+                        activity.slaWindowStart = string.IsNullOrEmpty(tmpExtractInfoforActivity[15]) ? string.Empty : tmpExtractInfoforActivity[15];
+                        activity.slaWindowEnd = string.IsNullOrEmpty(tmpExtractInfoforActivity[16]) ? string.Empty : tmpExtractInfoforActivity[16];
                         activity.postalCode = tmpExtractInfoforActivity[17];
                         activity.stateProvince = tmpExtractInfoforActivity[18];
                         activity.points = string.IsNullOrEmpty(tmpExtractInfoforActivity[19]) ? 0 : int.Parse(tmpExtractInfoforActivity[19]);
