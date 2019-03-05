@@ -24,15 +24,25 @@ namespace skymigration
 
         static void Main(string[] args)
         {
-          
+            Program.Logger(string.Format("******************************"), TypeLog.DEFAULT);
+            Program.Logger(string.Format(" Inicia proceso {0} ", DateTime.Now), TypeLog.DEFAULT);
+
             List<Activity> list = ctrlActivity.GetFromCSV(CurrentFilePath);
 
+            int count = 0;
             foreach (var item in list)
+            {
+                Console.Clear();
+                Console.WriteLine(string.Format("{0} de un total de {1} Actividades", count += 1, list.Count));
                 ctrlActivity.Create(item);
-            
-            
+            }
+
+
+            Program.Logger(string.Format(" Fin de proceso {0} ", DateTime.Now), TypeLog.DEFAULT);
+            Program.Logger(string.Format("******************************"), TypeLog.DEFAULT);
+
         }
-         
+
 
         /// <summary>
         /// 1 log_ok -> activity create success
@@ -67,7 +77,7 @@ namespace skymigration
                 file.WriteLine(lines);
                 file.Close();
             }
-            catch 
+            catch
             {
                 // Console.WriteLine(ex.Message);
                 Thread.Sleep(800);
