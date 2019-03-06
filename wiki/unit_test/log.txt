@@ -33,3 +33,6 @@
 ******************************
  Inicia proceso 2019-03-05 1:58:26 PM 
 |2019-03-05 1:58:31 PM|apptNumber:R03237419VIZ|resourceId:ESTEBANTEC2018|
+******************************
+ Inicia proceso 2019-03-05 4:10:17 PM 
+|2019-03-05 4:10:18 PM|apptNumber:R03237419VIZ|resourceId:ESTEBANTEC2018|
