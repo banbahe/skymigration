@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="Controllers\InventoryController.cs" />
     <Compile Include="Interfaz\IInventory.cs" />
+    <Compile Include="Models\ActivityBulk.cs" />
     <Compile Include="Models\Inventory.cs" />
     <Compile Include="Models\ResponseOFSC.cs" />
     <Compile Include="Util\UtilWebRequest.cs" />

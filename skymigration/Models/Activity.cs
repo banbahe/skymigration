@@ -6,6 +6,16 @@ using System.Threading.Tasks;
 
 namespace skymigration
 {
+    public class RootActivity
+    {
+        public UpdateParameters updateParameters { get; set; }
+        public List<Activity> activities { get; set; } 
+    }
+    public class UpdateParameters
+    {
+        public string identifyActivityBy { get; set; }
+        public string ifInFinalStatusThen { get; set; }
+    }
     /// <summary>
     /// 0	apptNumber
     /// 1	date

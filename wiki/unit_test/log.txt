@@ -1,38 +1,4 @@
 ******************************
- Inicia proceso 2019-03-05 1:08:24 PM 
-|2019-03-05 1:08:24 PM|apptNumber:R03237419VIZ|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:08:26 PM|apptNumber:81-90428767666|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:08:26 PM|apptNumber:81-90428767666|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:08:26 PM|apptNumber:81-90430487567|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:08:27 PM|apptNumber:81-90430487567|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:08:27 PM|apptNumber:81-90430266357|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:08:27 PM|apptNumber:81-90437133782|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:08:27 PM|apptNumber:81-90420321222|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:08:27 PM|apptNumber:81-90420356250|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:08:28 PM|apptNumber:81-90420356252|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:08:28 PM|apptNumber:81-90420356252|resourceId:ESTEBANTEC2018|
- Fin de proceso 2019-03-05 1:08:28 PM 
+ Inicia proceso 2019-03-06 7:04:54 PM 
+ Fin de proceso 2019-03-06 7:06:01 PM 
 ******************************
-******************************
- Inicia proceso 2019-03-05 1:16:34 PM 
-******************************
- Inicia proceso 2019-03-05 1:47:14 PM 
-|2019-03-05 1:47:14 PM|apptNumber:R03237419VIZ|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:47:16 PM|apptNumber:81-90428767666|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:47:16 PM|apptNumber:81-90428767666|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:47:16 PM|apptNumber:81-90430487567|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:47:17 PM|apptNumber:81-90430487567|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:47:17 PM|apptNumber:81-90430266357|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:47:17 PM|apptNumber:81-90437133782|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:47:17 PM|apptNumber:81-90420321222|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:47:17 PM|apptNumber:81-90420356250|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:47:18 PM|apptNumber:81-90420356252|resourceId:ESTEBANTEC2018|
-|2019-03-05 1:47:18 PM|apptNumber:81-90420356252|resourceId:ESTEBANTEC2018|
- Fin de proceso 2019-03-05 1:47:18 PM 
-******************************
-******************************
- Inicia proceso 2019-03-05 1:58:26 PM 
-|2019-03-05 1:58:31 PM|apptNumber:R03237419VIZ|resourceId:ESTEBANTEC2018|
-******************************
- Inicia proceso 2019-03-05 4:10:17 PM 
-|2019-03-05 4:10:18 PM|apptNumber:R03237419VIZ|resourceId:ESTEBANTEC2018|

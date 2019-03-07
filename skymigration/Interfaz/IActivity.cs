@@ -10,6 +10,6 @@ namespace skymigration
     {
         List<Activity> GetFromCSV(string path);
         Activity Create(Activity activity);
-
+        RootActivityBulk CreateBulk(RootActivity activities);
     }
 }

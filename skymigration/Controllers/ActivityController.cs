@@ -1,4 +1,4 @@
-﻿
+﻿using System.Threading;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -13,8 +13,39 @@ namespace skymigration
     {
         public string Authorization { get; set; } = ConfigurationManager.AppSettings["currentenviroment"].ToString();
         private string source { get; set; }
+        private int attemps { get; set; } = 0;
+        public RootActivityBulk CreateBulk(RootActivity activities)
+        {
+            RootActivityBulk resultbulkactivity = new RootActivityBulk();
+            string bulkactivity = JsonConvert.SerializeObject(activities, Formatting.None);
 
+            ResponseOFSC result = UtilWebRequest.SendWayAsync("rest/ofscCore/v1/activities/custom-actions/bulkUpdate", enumMethod.POST, bulkactivity, Authorization);
+            result.Content = result.Content.Replace("\n", string.Empty);
 
+            // REQUEST OK
+            if (result.statusCode >= 200 && result.statusCode < 300)
+            {
+                attemps += 0;
+                resultbulkactivity = JsonConvert.DeserializeObject<RootActivityBulk>(result.Content);
+                Program.Logger(string.Format("|{0}|statusCode:{1}|Content:{2}|ErrorMessage:{3}|activities:{4}|", DateTime.Now,result.statusCode, result.Content, result.ErrorMessage, JsonConvert.SerializeObject(activities.activities, Formatting.None)), TypeLog.OK_REST_ACTIVITY);
+            }
+
+            // REQUEST NETWORK CONNECTION BEING DOWN 
+            else if (result.statusCode == 0 && attemps < 3)
+            {
+                attemps += 1;
+                Program.Logger(string.Format("|{0}|statusCode:{1}|Content:{2}|ErrorMessage:{3}|activities{4}|", DateTime.Now, result.statusCode, result.Content, result.ErrorMessage, bulkactivity), TypeLog.NSHTTPURLResponse);
+                Thread.Sleep(1000);
+                CreateBulk(activities);
+            }
+
+            // REQUEST BAD
+            //else 
+            //{
+            //    Program.Logger(string.Format("|{0}|activities:{1}|Content:{2}|", DateTime.Now, bulkactivity, result.Content), TypeLog.BAD_REST_ACTIVITY);
+            //}
+            return resultbulkactivity;
+        }
         public Activity Create(Activity activity)
         {
             Program.Logger(string.Format("|{0}|apptNumber:{1}|resourceId:{2}|", DateTime.Now, activity.apptNumber, activity.resourceId), TypeLog.DEFAULT);
@@ -35,7 +66,6 @@ namespace skymigration
 
             return responseActivity;
         }
-
         public Activity Exist(Activity activity)
         {
             Program.Logger(string.Format("|{0}|apptNumber:{1}|resourceId:{2}|", DateTime.Now, activity.apptNumber, activity.resourceId), TypeLog.DEFAULT);
@@ -61,7 +91,6 @@ namespace skymigration
             List<string> listCSVLines = ReadCSV(path);
             return FillList(listCSVLines);
         }
-
         private List<Activity> FillList(List<string> listCSVLines)
         {
             List<Activity> listActivity = new List<Activity>();
@@ -171,7 +200,6 @@ namespace skymigration
             }
             return listActivity;
         }
-
         private List<string> ReadCSV(string path)
         {
             this.source = path;
@@ -183,7 +211,6 @@ namespace skymigration
             list.AddRange(result);
             return list;
         }
-
         private async Task<List<string>> LinesFileAsync()
         {
             List<string> listResult = new List<string>();

@@ -17,12 +17,12 @@ namespace skymigration
         BAD_REST_INVENTORY,
         BAD_IO_ACTIVITY,
         BAD_IO_ENTITY,
+        NSHTTPURLResponse,
     }
     class Program
     {
         static IActivity ctrlActivity = new ActivityController();
         static string CurrentFilePath = ConfigurationManager.AppSettings["currentfile"].ToString();
-
 
         static void Main(string[] args)
         {
@@ -31,25 +31,34 @@ namespace skymigration
 
             List<Activity> list = ctrlActivity.GetFromCSV(CurrentFilePath);
 
-            int count = 0;
-            int activity_ok = 0;
-            int activity_bad = 1;
+            RootActivity activities = new RootActivity();
+            activities.activities = new List<Activity>();
+            activities.activities = list;
+
+            activities.updateParameters = new UpdateParameters();
+            activities.updateParameters.identifyActivityBy = "apptNumber";
+            activities.updateParameters.ifInFinalStatusThen = "createNew";
+
+            ctrlActivity.CreateBulk(activities);
+            //int count = 0;
+            //int activity_ok = 0;
+            //int activity_bad = 1;
 
             //Parallel.ForEach(list, item =>
             //{
             //    ctrlActivity.Create(item);
             //});
 
-            foreach (var item in list)
-            {
-                Console.Clear();
-                Console.WriteLine(string.Format("{0} de un total de {1} Actividades", count += 1, list.Count));
-                var response = ctrlActivity.Create(item);
-                if (response == null)
-                    activity_bad += 1;
-                else
-                    activity_ok += 1;
-            }
+            //foreach (var item in list)
+            //{
+            //    Console.Clear();
+            //    Console.WriteLine(string.Format("{0} de un total de {1} Actividades", count += 1, list.Count));
+            //    var response = ctrlActivity.Create(item);
+            //    if (response == null)
+            //        activity_bad += 1;
+            //    else
+            //        activity_ok += 1;
+            //}
 
             Program.Logger(string.Format(" Fin de proceso {0} ", DateTime.Now), TypeLog.DEFAULT);
             Program.Logger(string.Format("******************************"), TypeLog.DEFAULT);
@@ -73,6 +82,9 @@ namespace skymigration
                 string temppath = string.Empty;
                 switch (typeLog)
                 {
+                    case TypeLog.NSHTTPURLResponse:
+                        temppath = @sPath + "\\log_activity_NSHTTPURLResponse.txt";
+                        break;
                     case TypeLog.OK_REST_ACTIVITY:
                         temppath = @sPath + "\\log_activity_create.txt";
                         break;

@@ -1,0 +1,14 @@
+|2019-03-06 7:04:54 PM|*Error al llenar el objecto Actividad,* La longitud minima es de 72 posiciones, linea en csv esta mal formada||
+|2019-03-06 7:04:54 PM|*Error al llenar el objecto Actividad,* La longitud minima es de 72 posiciones, linea en csv esta mal formada|Sky_TOA_2018.|
+|2019-03-06 7:04:54 PM|*Error al llenar el objecto Actividad,* La longitud minima es de 72 posiciones, linea en csv esta mal formada|USROFSC_ADMIN dar permisos de visibilidad CA|
+|2019-03-06 7:04:54 PM|*Error al llenar el objecto Actividad,* La longitud minima es de 72 posiciones, linea en csv esta mal formada|buscar si se cargo CA |
+|2019-03-06 7:04:54 PM|*Error al llenar el objecto Actividad,* La longitud minima es de 72 posiciones, linea en csv esta mal formada||
+|2019-03-06 7:04:54 PM|*Error al llenar el objecto Actividad,* La longitud minima es de 72 posiciones, linea en csv esta mal formada|usar en bulkupdate parametro identifyActivityBy(optional): string == apptNumber|
+|2019-03-06 7:04:54 PM|*Error al llenar el objecto Actividad,* La longitud minima es de 72 posiciones, linea en csv esta mal formada|y preguntar que hacer si existe y esta pendiente se actualizan los campos|
+|2019-03-06 7:04:54 PM|*Error al llenar el objecto Actividad,* La longitud minima es de 72 posiciones, linea en csv esta mal formada|si existe y esta en un estado (finalizada, cancelada , suspendida) no se hace nada  ifInFinalStatusThen == doNothing |
+|2019-03-06 7:04:54 PM|*Error al llenar el objecto Actividad,* La longitud minima es de 72 posiciones, linea en csv esta mal formada||
+|2019-03-06 7:04:54 PM|*Error al llenar el objecto Actividad,* La longitud minima es de 72 posiciones, linea en csv esta mal formada|los tienen identificador por la orden de servicio en el nombre del archivo, preguntar donde los van a poner disponibles.|
+|2019-03-06 7:04:54 PM|*Error al llenar el objecto Actividad,* La longitud minima es de 72 posiciones, linea en csv esta mal formada|hacer pruebas con no programadas|
+|2019-03-06 7:04:54 PM|*Error al llenar el objecto Actividad,* La longitud minima es de 72 posiciones, linea en csv esta mal formada||
+|2019-03-06 7:04:54 PM|*Error al llenar el objecto Actividad,* La longitud minima es de 72 posiciones, linea en csv esta mal formada|en caso de no indicar recurso se tiene que usar un recurso por default,|
+|2019-03-06 7:04:54 PM|*Error al llenar el objecto Actividad,* La longitud minima es de 72 posiciones, linea en csv esta mal formada|si el resource id esta vacio tomar el valor que se configure en un archivo de configuración |
