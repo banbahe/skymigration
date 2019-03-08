@@ -14,6 +14,33 @@ namespace skymigration
         public string Authorization { get; set; } = ConfigurationManager.AppSettings["currentenviroment"].ToString();
         private string source { get; set; }
         private int attemps { get; set; } = 0;
+
+        private void AnalyzingBulk(RootActivityBulk resultbulkactivity, RootActivity activities)
+        {
+            foreach (var item in resultbulkactivity.results)
+            {
+                try
+                {
+
+
+                    LayoutOutput layoutOutput = new LayoutOutput();
+                    layoutOutput.activityId = item.activityKeys.activityId;
+                    layoutOutput.apptNumber = item.activityKeys.apptNumber;
+                    var tmpactivity = activities.activities.FirstOrDefault(x => x.apptNumber == item.activityKeys.apptNumber && x.customerNumber == item.activityKeys.customerNumber);
+                    layoutOutput.date = tmpactivity.date;
+                    layoutOutput.timeSlot = tmpactivity.timeSlot;
+                    layoutOutput.resultActivity = item.operationsPerformed == null ? "operationsFailed " + item.operationsFailed.FirstOrDefault() : item.operationsPerformed.FirstOrDefault();
+                    layoutOutput.resultInventory = "*PENDIENTE";
+                    string lineCSV = string.Format("{0};{1};{2};{3};{4};{5};", layoutOutput.activityId, layoutOutput.apptNumber, layoutOutput.date, layoutOutput.timeSlot, layoutOutput.resultActivity, layoutOutput.resultInventory);
+                    Program.LoggerCSV(lineCSV);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    Thread.Sleep(1500);
+                }
+            }
+        }
         public RootActivityBulk CreateBulk(RootActivity activities)
         {
             RootActivityBulk resultbulkactivity = new RootActivityBulk();
@@ -27,7 +54,10 @@ namespace skymigration
             {
                 attemps += 0;
                 resultbulkactivity = JsonConvert.DeserializeObject<RootActivityBulk>(result.Content);
-                Program.Logger(string.Format("|{0}|statusCode:{1}|Content:{2}|ErrorMessage:{3}|activities:{4}|", DateTime.Now,result.statusCode, result.Content, result.ErrorMessage, JsonConvert.SerializeObject(activities.activities, Formatting.None)), TypeLog.OK_REST_ACTIVITY);
+                Program.Logger(string.Format("|{0}|statusCode:{1}|Content:{2}|ErrorMessage:{3}|activities:{4}|", DateTime.Now, result.statusCode, result.Content, result.ErrorMessage, JsonConvert.SerializeObject(activities.activities, Formatting.None)), TypeLog.OK_REST_ACTIVITY);
+
+                // Analyzing object
+                AnalyzingBulk(resultbulkactivity, activities);
             }
 
             // REQUEST NETWORK CONNECTION BEING DOWN 
@@ -35,7 +65,7 @@ namespace skymigration
             {
                 attemps += 1;
                 Program.Logger(string.Format("|{0}|statusCode:{1}|Content:{2}|ErrorMessage:{3}|activities{4}|", DateTime.Now, result.statusCode, result.Content, result.ErrorMessage, bulkactivity), TypeLog.NSHTTPURLResponse);
-                Thread.Sleep(1000);
+                Thread.Sleep(5000);
                 CreateBulk(activities);
             }
 

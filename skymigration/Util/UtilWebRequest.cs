@@ -17,7 +17,6 @@ namespace skymigration
     }
     public class UtilWebRequest
     {
-
         public static ResponseOFSC SendWayAsync(string endpoint, enumMethod enumMethod, string data, string token)
         {
             var client = new RestClient("https://api.etadirect.com/" + endpoint);
@@ -68,6 +67,7 @@ namespace skymigration
             }
             return null;
         }
+
     }
 
 

@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading;
 using System.Configuration;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace skymigration
 {
@@ -31,9 +32,14 @@ namespace skymigration
 
             List<Activity> list = ctrlActivity.GetFromCSV(CurrentFilePath);
 
+            // DISTINCT LIST FOR apptNumber
+
+            var tmp = (from table in list
+                       select table.apptNumber).Distinct();
+            
             RootActivity activities = new RootActivity();
             activities.activities = new List<Activity>();
-            activities.activities = list;
+            //activities.activities = from tableresult in tmp join tableorign in list equals equals tableorign.apptNumber select tableresult;
 
             activities.updateParameters = new UpdateParameters();
             activities.updateParameters.identifyActivityBy = "apptNumber";
@@ -110,5 +116,25 @@ namespace skymigration
             }
         }
 
+        public static void LoggerCSV(String lines)
+        {
+            string @sPath = System.IO.Path.GetDirectoryName(CurrentFilePath);
+
+            try
+            {
+                string temppath = string.Empty;
+                string tmpDate = DateTime.Now.ToString("yyyy-MM-dd");
+                temppath = @sPath + "\\layout_output_" + tmpDate + ".csv";
+                System.IO.StreamWriter file = new System.IO.StreamWriter(temppath, true);
+                file.WriteLine(lines);
+                file.Close();
+            }
+            catch
+            {
+                // Console.WriteLine(ex.Message);
+                Thread.Sleep(888);
+                LoggerCSV(lines);
+            }
+        }
     }
 }

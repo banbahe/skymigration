@@ -1,0 +1,18 @@
+activityID;apptNumber;resourceId;Type Command;date;timeSlot;XA_HoraAtencionProgramada;Result;Type Message;Cod;Description;
+8746;R03237419VIZ0;ESTEBANTEC2018;Type Command;2019-03-21;TS16;16:00:00;Result;Type Message;Cod;Description;
+
+ResultInventory
+|3005900:201|DECO_XR300:400|
+
+ResultActivity
+updateProperties <= operationsPerformed
+
+ 
+
+·         ID Actividad: 8744
+·         apptNumber: 81-70605879184
+·         resource_id: DI17100161
+·         Fecha agendada: YYYY-MM-DD
+·         Time Slot: TS11
+·         ResultActivity: operationsPerformed.updateProperties*
+          ResultInventory:|3005900:201|DECO_XR300:400|
