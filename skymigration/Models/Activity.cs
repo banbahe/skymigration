@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace skymigration
     public class RootActivity
     {
         public UpdateParameters updateParameters { get; set; }
-        public List<Activity> activities { get; set; } 
+        public List<Activity> activities { get; set; }
     }
     public class UpdateParameters
     {
@@ -118,7 +119,7 @@ namespace skymigration
                 if (value.Trim().Length == 16)
                     SlaWindowStart = string.Concat(value.Trim(), ":00");
                 else
-                    SlaWindowStart = value;
+                    SlaWindowStart = UtilWebRequest.IsNullOrEmpty(value);
             }
         }
         private string SlaWindowEnd;
@@ -130,12 +131,12 @@ namespace skymigration
                 if (value.Trim().Length == 16)
                     SlaWindowEnd = string.Concat(value.Trim(), ":00");
                 else
-                    SlaWindowEnd = value;
+                    SlaWindowStart = UtilWebRequest.IsNullOrEmpty(value);
             }
         }
         public string postalCode { get; set; }
         public string stateProvince { get; set; }
-        public int points { get; set; }
+        public int? points { get; set; }
         public string XA_FechaAtencionProgramada { get; set; }
         public string XA_HoraAtencionProgramada { get; set; }
         public string XA_Prioridad { get; set; }
@@ -194,4 +195,27 @@ namespace skymigration
 
         public List<Inventory> Inventories { get; set; }
     }
+
+    public class MyBaseClass
+    {
+        //[JsonIgnore]
+        //public string Name { get; set; }
+        private string _Name;
+
+        public string Name
+        {
+            get
+            {
+
+                return _Name;
+            }
+            set { _Name = value; }
+        }
+
+        public int? Number { get; set; }
+    }
+
+
+
+
 }

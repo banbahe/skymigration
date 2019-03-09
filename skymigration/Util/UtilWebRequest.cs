@@ -13,8 +13,9 @@ namespace skymigration
         POST,
         DELETE,
         PUT,
-        PATCH
+        PATCH,
     }
+
     public class UtilWebRequest
     {
         public static ResponseOFSC SendWayAsync(string endpoint, enumMethod enumMethod, string data, string token)
@@ -62,12 +63,25 @@ namespace skymigration
         public static dynamic IsNullOrEmpty(dynamic value)
         {
             if (value == null)
-            {
-
-            }
-            return null;
+                return null;
+            else if (string.IsNullOrEmpty(value))
+                return null;
+            return value;
         }
 
+    }
+
+    public class ItemEqualityComparer : IEqualityComparer<Activity>
+    {
+        public bool Equals(Activity x, Activity y)
+        {
+            return x.apptNumber == y.apptNumber;
+        }
+
+        public int GetHashCode(Activity obj)
+        {
+            return obj.activityId.GetHashCode();
+        }
     }
 
 

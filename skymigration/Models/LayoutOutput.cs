@@ -10,11 +10,14 @@ namespace skymigration
     {
         public int activityId { get; set; }
         public string apptNumber { get; set; }
+        public string typeCommand { get; set; } = "Bulk Update";
         public string resourceId { get; set; }
         public string date { get; set; }
         public string timeSlot { get; set; }
-        public string resultActivity{ get; set; }
-        public string resultInventory { get; set; }
-
+        public string horarioAgendado { get; set; }
+        public string result{ get; set; }
+        public string typeMessage { get; set; } = "insert";
+        public int cod { get; set; } = 0;
+        public string description { get; set; }
     }
 }
