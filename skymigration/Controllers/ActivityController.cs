@@ -46,19 +46,31 @@ namespace skymigration
                     layoutOutput.horarioAgendado = horarioAgendado;
                     string resultInventory = string.Empty;
 
-                    foreach (var itemInventory in tmpactivity.inventories.items)
-                        resultInventory += itemInventory.inventoryType + ":" + itemInventory.status + "|";
+                    foreach (Item itemInventory in tmpactivity.inventories.items)
+                    {
+                        if (item.errors != null)
+                        {
+                            if (item.errors.Count > 0 && item.errors[0].operation == "updateInventories")
+                            {
+                                string tmp = item.errors[0].errorDetail.Split(':')[1];
+                                tmp = tmp.Replace("'", string.Empty);
+                                tmp = tmp.Trim();
+                                bool flag = tmp == (itemInventory.inventoryType);
+                                if (flag)
+                                    resultInventory += itemInventory.inventoryType + ":400|";
+                                else
+                                    resultInventory += itemInventory.inventoryType + ":200|";
+                            }
+                        }
+                        else
+                            resultInventory += itemInventory.inventoryType + ":200|";
+                    }
+
 
                     layoutOutput.result = item.operationsPerformed == null ? "operationsFailed " + item.errors[0].errorDetail : item.operationsPerformed.FirstOrDefault();
+                    layoutOutput.result = layoutOutput.result + "|" + resultInventory;
 
-                    // layoutOutput.result = item.operationsFailed
-                    // (item.operationsFailed).Items[0]
-                    // inventories
-                    if (item.operationsFailed != null)
-                    {
-                        if (item.operationsFailed[0] == "updateInventories")
-                            layoutOutput.result = layoutOutput.result + "|" + item.errors[0].errorDetail;
-                    }
+
 
 
                     // layoutOutput.description = "Appointment id = " + layoutOutput.activityId;
@@ -194,7 +206,7 @@ namespace skymigration
                         //activity.inventories.items = new List<Item>();
                         // TODO 
                         // ERASE BELOW LINE
-                        activity.resourceId = "ESTEBANTEC2018";
+                        // activity.resourceId = "ESTEBANTEC2018";
                         activity.customerNumber = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[3]);
                         activity.activityType = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[4]);
                         activity.timeSlot = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[5]);
