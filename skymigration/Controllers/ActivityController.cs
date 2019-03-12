@@ -19,7 +19,7 @@ namespace skymigration
 
         private void AnalyzingBulk(RootActivityBulk resultbulkactivity, RootActivity activities)
         {
-            DateTime tmpdateTime = new DateTime();
+
             foreach (var item in resultbulkactivity.results)
             {
                 try
@@ -29,36 +29,57 @@ namespace skymigration
                     layoutOutput.apptNumber = item.activityKeys.apptNumber;
                     var tmpactivity = activities.activities.FirstOrDefault(x => x.apptNumber == item.activityKeys.apptNumber && x.customerNumber == item.activityKeys.customerNumber);
                     layoutOutput.resourceId = tmpactivity.resourceId;
-                    // if exist date, changed format
-                    if (!string.IsNullOrEmpty(tmpactivity.date))
+
+                    if (string.IsNullOrEmpty(tmpactivity.date))
+                        tmpactivity.date = tmpactivity.date;
+                    else
                     {
-                        tmpdateTime = DateTime.Parse(tmpactivity.date, CultureInfo.InvariantCulture);
-                        tmpactivity.date = tmpdateTime.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+                        DateTime tmpdateTime;
+                        DateTime.TryParse(tmpactivity.date, out tmpdateTime);
+
+                        if (tmpdateTime.Year != 1)
+                            tmpactivity.date = tmpdateTime.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
                     }
                     layoutOutput.date = tmpactivity.date;
                     layoutOutput.timeSlot = tmpactivity.timeSlot;
                     string horarioAgendado = string.IsNullOrEmpty(layoutOutput.timeSlot) ? string.Empty : Program.DictionaryTimeSlot[tmpactivity.timeSlot];
                     layoutOutput.horarioAgendado = horarioAgendado;
-                    layoutOutput.result = item.operationsPerformed == null ? "operationsFailed " + item.operationsFailed.FirstOrDefault() : item.operationsPerformed.FirstOrDefault();
-                    layoutOutput.description = "Appointment id = " + layoutOutput.activityId;
+                    string resultInventory = string.Empty;
+
+                    foreach (var itemInventory in tmpactivity.inventories.items)
+                        resultInventory += itemInventory.inventoryType + ":" + itemInventory.status + "|";
+
+                    layoutOutput.result = item.operationsPerformed == null ? "operationsFailed " + item.errors[0].errorDetail : item.operationsPerformed.FirstOrDefault();
+
+                    // layoutOutput.result = item.operationsFailed
+                    // (item.operationsFailed).Items[0]
+                    // inventories
+                    if (item.operationsFailed != null)
+                    {
+                        if (item.operationsFailed[0] == "updateInventories")
+                            layoutOutput.result = layoutOutput.result + "|" + item.errors[0].errorDetail;
+                    }
+
+
+                    // layoutOutput.description = "Appointment id = " + layoutOutput.activityId;
                     string lineCSV = string.Format("{0};{1};{2};{3};{4};{5};{6};{7};{8};{9};{10};",
-                                      layoutOutput.activityId,
-                                      layoutOutput.apptNumber,
-                                      layoutOutput.typeCommand,
-                                      layoutOutput.resourceId,
-                                      layoutOutput.date,
-                                      layoutOutput.timeSlot,
-                                      layoutOutput.horarioAgendado,
-                                      layoutOutput.result,
-                                      layoutOutput.typeMessage,
-                                      layoutOutput.cod,
-                                      layoutOutput.description);
+                                                   layoutOutput.activityId,
+                                                   layoutOutput.apptNumber,
+                                                   layoutOutput.typeCommand,
+                                                   layoutOutput.resourceId,
+                                                   layoutOutput.date,
+                                                   layoutOutput.timeSlot,
+                                                   layoutOutput.horarioAgendado,
+                                                   layoutOutput.result,
+                                                   layoutOutput.typeMessage,
+                                                   layoutOutput.cod,
+                                                   layoutOutput.description);
+
                     Program.LoggerCSV(lineCSV);
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
-                    Thread.Sleep(1500);
                 }
             }
         }
@@ -155,18 +176,22 @@ namespace skymigration
                     try
                     {
                         string[] tmpExtractInfoforActivity = listCSVLines[i].Split(';');
-
                         //  For Activity required  minimun 72 array length
-
                         if (tmpExtractInfoforActivity.Length < 72)
                             throw new Exception("* La longitud minima es de 72 posiciones, linea en csv esta mal formada");
 
                         Activity activity = new Activity();
+
+
+
                         activity.apptNumber = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[0]);
                         activity.date = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[1]);
 
                         activity.resourceId = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[2]);
                         activity.resourceId = string.IsNullOrEmpty(activity.resourceId) ? activity.resourceId : ConfigurationManager.AppSettings["resourceiddefault"].ToString();
+
+                        //activity.inventories = new Inventories();
+                        //activity.inventories.items = new List<Item>();
                         // TODO 
                         // ERASE BELOW LINE
                         activity.resourceId = "ESTEBANTEC2018";
@@ -247,13 +272,41 @@ namespace skymigration
                         activity.XA_id_instalador = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[70]);
                         activity.XA_mov_tipo_eq = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[71]);
                         activity.XA_red = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[72]);
-                        listActivity.Add(activity);
 
-                        // Check if has inventory
-                        if (tmpExtractInfoforActivity.Length == 80)
+                        // 
+                        Activity getexistactivity = new Activity();
+                        if (tmpExtractInfoforActivity.Length >= 80)
                         {
+                            getexistactivity = listActivity.FirstOrDefault(x => x.apptNumber == activity.apptNumber);
+                            activity.inventories = new Inventories();
+                            activity.inventories.items = new List<Item>();
 
+                            Item item = new Item();
+                            item.inventoryType = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[73]);
+                            item.serialNumber = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[74]);
+                            item.XI_TI = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[75]);
+                            item.XI_jerarquia = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[76]);
+                            item.XI_estatus = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[77]);
+                            item.quantity = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[78]) == null ? 0 : int.Parse(tmpExtractInfoforActivity[78]);
+                            item.XI_Marca = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[79]);
+                            item.XI_Modelo = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[80]);
+
+                            if (getexistactivity != null)
+                                getexistactivity.inventories.items.Add(item);
+                            else
+                                activity.inventories.items.Add(item);
                         }
+
+                        if (getexistactivity == null)
+                            listActivity.Add(activity);
+
+                        else
+                        {
+                            var itemToRemove = listActivity.FirstOrDefault(x => x.apptNumber == activity.apptNumber);
+                            listActivity.Remove(itemToRemove);
+                            listActivity.Add(getexistactivity);
+                        }
+
                     }
                     catch (Exception ex)
                     {
@@ -261,6 +314,35 @@ namespace skymigration
                     }
                 }
             }
+            // TODO
+            // pruebas de stress
+            //for (int i = 0; i < 1000000; i++)
+            //{
+            //    Activity activity = new Activity();
+            //    activity.activityId = listActivity[0].activityId;
+            //    activity.apptNumber = Guid.NewGuid().ToString();
+            //    activity.date =  listActivity[0].date;
+            //    activity.resourceId = listActivity[0].resourceId;
+            //    activity.customerNumber = listActivity[0].customerNumber;
+            //    activity.activityType = listActivity[0].activityType;
+            //    activity.timeSlot = listActivity[0].timeSlot;
+            //    activity.customerName = listActivity[0].customerName;
+            //    activity.customerPhone = listActivity[0].customerPhone;
+            //    activity.customerCell = listActivity[0].customerCell;
+            //    activity.customerEmail = listActivity[0].customerEmail;
+            //    activity.streetAddress = listActivity[0].streetAddress;
+            //    activity.city = listActivity[0].city;
+            //    activity.country_code = listActivity[0].country_code;
+            //    activity.longitude = listActivity[0].longitude;
+            //    activity.latitude = listActivity[0].latitude;
+            //    activity.slaWindowStart = listActivity[0].slaWindowStart;
+            //    activity.slaWindowEnd = listActivity[0].slaWindowEnd;
+            //    activity.postalCode = listActivity[0].postalCode;
+            //    activity.stateProvince = listActivity[0].stateProvince;
+            //    activity.points = listActivity[0].points;
+            //    listActivity.Add(activity);
+            //}
+
             return listActivity;
         }
         private List<string> ReadCSV(string path)
@@ -278,7 +360,7 @@ namespace skymigration
         {
             List<string> listResult = new List<string>();
 
-            using (var reader = new StreamReader(this.source, Encoding.UTF8, false))
+            using (var reader = new StreamReader(this.source, Encoding.UTF8, true))
             {
                 while (!reader.EndOfStream)
                 {

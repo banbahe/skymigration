@@ -131,7 +131,7 @@ namespace skymigration
                 if (value.Trim().Length == 16)
                     SlaWindowEnd = string.Concat(value.Trim(), ":00");
                 else
-                    SlaWindowStart = UtilWebRequest.IsNullOrEmpty(value);
+                    SlaWindowEnd = UtilWebRequest.IsNullOrEmpty(value);
             }
         }
         public string postalCode { get; set; }
@@ -193,7 +193,8 @@ namespace skymigration
         public string XA_mov_tipo_eq { get; set; }
         public string XA_red { get; set; }
 
-        public List<Inventory> Inventories { get; set; }
+        // public List<Inventory> Inventories { get; set; }
+        public Inventories inventories { get; set; }
     }
 
     public class MyBaseClass

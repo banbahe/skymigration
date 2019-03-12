@@ -52,39 +52,59 @@ namespace skymigration
         {
             // ************************************************
             // TEST
-            //MyDerivedClass myDerivedClass = new MyDerivedClass();
-            //myDerivedClass.Name = "Esteban Blanquel";
+            // MyDerivedClass myDerivedClass = new MyDerivedClass();
+            // myDerivedClass.Name = "Esteban Blanquel";
             // myDerivedClass.Number = 9;
-            //string bulkactivity = JsonConvert.SerializeObject(myDerivedClass, Formatting.None);
+            // string bulkactivity = JsonConvert.SerializeObject(myDerivedClass, Formatting.None);
 
-            //MyBaseClass myBaseClass = new MyBaseClass();
-            //myBaseClass.Name = "valor null";
-            //myBaseClass.Number = null;
-            //string bulkactivity = JsonConvert.SerializeObject(myBaseClass, Formatting.None,new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore});
+            // MyBaseClass myBaseClass = new MyBaseClass();
+            // myBaseClass.Name = "valor null";
+            // myBaseClass.Number = null;
+            // string bulkactivity = JsonConvert.SerializeObject(myBaseClass, Formatting.None,new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore});
 
             // *************************************************
+            int countactivities = 0;
             Program.Logger(string.Format("************************************************************"), TypeLog.DEFAULT);
             Program.Logger(string.Format(" Inicia proceso {0} ", DateTime.Now), TypeLog.DEFAULT);
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             List<Activity> list = ctrlActivity.GetFromCSV(CurrentFilePath);
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(" Procesando " + list.Count + " actividades");
+            Console.WriteLine(" Procesando actividades ");
 
             // DISTINCT LIST FOR apptNumber
-            var tmplist = list.Distinct(new ItemEqualityComparer());
+            // var tmplist = list.Distinct(new ItemEqualityComparer());
+            // var tmplist = list;
 
             RootActivity activities = new RootActivity();
             activities.activities = new List<Activity>();
-            activities.activities = tmplist.ToList<Activity>();
+            activities.activities = list;
 
             activities.updateParameters = new UpdateParameters();
             activities.updateParameters.identifyActivityBy = "apptNumber";
             activities.updateParameters.ifInFinalStatusThen = "createNew";
 
-            ctrlActivity.CreateBulk(activities);
+         
+            int maxcountrequest = 500;
+            double numberrequest = Math.Floor((double)activities.activities.Count / maxcountrequest);
+            numberrequest = numberrequest == 0 ? 1 : numberrequest;
+
+            List<Activity> full = activities.activities.ToList<Activity>();
+            for (int i = 0; i < numberrequest; i++)
+            {
+                List<Activity> tmpactiviti = full.Skip(i * maxcountrequest).Take(maxcountrequest).ToList<Activity>();
+                countactivities += tmpactiviti.Count;
+                // Activity
+                RootActivity activities2 = new RootActivity();
+                activities2.activities = new List<Activity>();
+                activities2.activities = tmpactiviti;
+                activities2.updateParameters = new UpdateParameters();
+                activities2.updateParameters.identifyActivityBy = "apptNumber";
+                activities2.updateParameters.ifInFinalStatusThen = "createNew";
+                ctrlActivity.CreateBulk(activities2);
+            }
             stopwatch.Stop();
-            string sMessageEnd = string.Format(" Se procesaron {0} actividades en {1} segundos, el tiempo estimado por creación de actividad es de {2}", list.Count, stopwatch.Elapsed.TotalSeconds, (stopwatch.Elapsed.TotalSeconds / list.Count));
+            string sMessageEnd = string.Format(" Se procesaron {0} actividades en {1} segundos, el tiempo estimado por creación de actividad es de {2}", countactivities, stopwatch.Elapsed.TotalSeconds, (stopwatch.Elapsed.TotalSeconds / countactivities));
             Console.WriteLine(sMessageEnd);
             Program.Logger(sMessageEnd, TypeLog.DEFAULT);
             Program.Logger(string.Format(" Fin de proceso {0} ", DateTime.Now), TypeLog.DEFAULT);
@@ -110,13 +130,13 @@ namespace skymigration
                 switch (typeLog)
                 {
                     case TypeLog.NSHTTPURLResponse:
-                        temppath = @sPath + "\\log_activity_NSHTTPURLResponse.txt";
+                        temppath = @sPath + "\\log_NSHTTPURLResponse.txt";
                         break;
                     case TypeLog.OK_REST_ACTIVITY:
-                        temppath = @sPath + "\\log_activity_create.txt";
+                        temppath = @sPath + "\\log_request.txt";
                         break;
                     case TypeLog.BAD_REST_ACTIVITY:
-                        temppath = @sPath + "\\log_activity_bad_request.txt";
+                        temppath = @sPath + "\\log_bad_request.txt";
                         break;
                     case TypeLog.BAD_IO_ACTIVITY:
                         temppath = @sPath + "\\log_error.txt";
