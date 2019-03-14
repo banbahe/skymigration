@@ -1,5 +1,0 @@
-************************************************************
- Inicia proceso 2019-03-14 4:36:27 PM 
- Se procesaron 1500 actividades en 43.0180326 segundos, el tiempo estimado por creación de actividad es de 0.0286786884
- Fin de proceso 2019-03-14 4:37:10 PM 
-************************************************************

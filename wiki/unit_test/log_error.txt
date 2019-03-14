@@ -1,1 +1,0 @@
-|2019-03-14 4:36:40 PM|* Error en la Orden de Servicio:81-68950487689 | Detalle: operationsFailed Invalid 'slaWindowStart'. Got: '15/03/2018 10:00:00' but expected format: 'YYYY-MM-DD HH:MM:SS'|
