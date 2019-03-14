@@ -50,44 +50,84 @@ namespace skymigration
                     {
                         if (item.errors != null)
                         {
-                            if (item.errors.Count > 0 && item.errors[0].operation == "updateInventories")
+                            if (item.errors.Count > 0 && (item.errors[0].operation == "updateInventories" || item.errors[0].operation == "updateProperties"))
                             {
-                                string tmp = item.errors[0].errorDetail.Split(':')[1];
+
+                                string[] tmp2 = item.errors[0].errorDetail.Split(new string[] { "Value:" }, StringSplitOptions.None);
+                                string tmp = tmp2[1];
                                 tmp = tmp.Replace("'", string.Empty);
                                 tmp = tmp.Trim();
-                                bool flag = tmp == (itemInventory.inventoryType);
-                                if (flag)
+
+                                bool flag = false;
+                                if (item.errors[0].operation == "updateInventories" && item.activityKeys.activityId > 0)
+                                {
                                     resultInventory += itemInventory.inventoryType + ":400|";
-                                else
-                                    resultInventory += itemInventory.inventoryType + ":200|";
+                                    Program.Logger(string.Format("|{0}|* Error en la Orden de Servicio:{1}| Detalle: Inventario inexistente {2}|", DateTime.Now, layoutOutput.apptNumber, itemInventory.inventoryType), TypeLog.BAD_IO_ACTIVITY);
+                                }
+                                else if (item.errors[0].operation == "updateInventories" && item.activityKeys.activityId <= 0)
+                                {
+                                    flag = tmp == (itemInventory.inventoryType);
+                                    if (flag)
+                                    {
+                                        resultInventory += itemInventory.inventoryType + ":400|";
+                                        Program.Logger(string.Format("|{0}|* Error en la Orden de Servicio:{1}| Detalle: Inventario inexistente {2}|", DateTime.Now, layoutOutput.apptNumber, itemInventory.inventoryType), TypeLog.BAD_IO_ACTIVITY);
+                                    }
+                                    else
+                                    {
+                                        resultInventory += itemInventory.inventoryType + ":200|";
+                                    }
+                                }
+
+                                else if (item.errors[0].operation == "updateProperties")
+                                {
+                                    flag = itemInventory.inventoryType == tmp;
+
+
+                                    if (flag)
+                                    {
+                                        resultInventory += itemInventory.inventoryType + ":200|";
+                                    }
+                                    else
+                                    {
+                                        resultInventory += itemInventory.inventoryType + ":400|";
+                                        Program.Logger(string.Format("|{0}|* Error en la Orden de Servicio:{1}| Detalle: Inventario inexistente {2}|", DateTime.Now, layoutOutput.apptNumber, itemInventory.inventoryType), TypeLog.BAD_IO_ACTIVITY);
+                                    }
+                                }
+
                             }
                         }
                         else
                             resultInventory += itemInventory.inventoryType + ":200|";
                     }
 
+                    if (item.operationsPerformed == null)
+                    {
+                        layoutOutput.result = "operationsFailed " + item.errors[0].errorDetail;
+                        Program.Logger(string.Format("|{0}|* Error en la Orden de Servicio:{1} | Detalle: {2}|", DateTime.Now, layoutOutput.apptNumber, layoutOutput.result), TypeLog.BAD_IO_ACTIVITY);
+                    }
+                    else
+                        layoutOutput.result = item.operationsPerformed.FirstOrDefault();
 
-                    layoutOutput.result = item.operationsPerformed == null ? "operationsFailed " + item.errors[0].errorDetail : item.operationsPerformed.FirstOrDefault();
+                    // layoutOutput.result = item.operationsPerformed == null ? "operationsFailed " + item.errors[0].errorDetail : item.operationsPerformed.FirstOrDefault();
                     layoutOutput.result = layoutOutput.result + "|" + resultInventory;
+                    layoutOutput.description = "Appointment id = " + layoutOutput.activityId;
+                    if (layoutOutput.activityId > 0)
+                    {
+                        string lineCSV = string.Format("{0};{1};{2};{3};{4};{5};{6};{7};{8};{9};{10};",
+                                                       layoutOutput.activityId,
+                                                       layoutOutput.apptNumber,
+                                                       layoutOutput.typeCommand,
+                                                       layoutOutput.resourceId,
+                                                       layoutOutput.date,
+                                                       layoutOutput.timeSlot,
+                                                       layoutOutput.horarioAgendado,
+                                                       layoutOutput.result,
+                                                       layoutOutput.typeMessage,
+                                                       layoutOutput.cod,
+                                                       layoutOutput.description);
 
-
-
-
-                    // layoutOutput.description = "Appointment id = " + layoutOutput.activityId;
-                    string lineCSV = string.Format("{0};{1};{2};{3};{4};{5};{6};{7};{8};{9};{10};",
-                                                   layoutOutput.activityId,
-                                                   layoutOutput.apptNumber,
-                                                   layoutOutput.typeCommand,
-                                                   layoutOutput.resourceId,
-                                                   layoutOutput.date,
-                                                   layoutOutput.timeSlot,
-                                                   layoutOutput.horarioAgendado,
-                                                   layoutOutput.result,
-                                                   layoutOutput.typeMessage,
-                                                   layoutOutput.cod,
-                                                   layoutOutput.description);
-
-                    Program.LoggerCSV(lineCSV);
+                        Program.LoggerCSV(lineCSV);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -95,7 +135,7 @@ namespace skymigration
                 }
             }
         }
-        public RootActivityBulk CreateBulk(RootActivity activities)
+        public RootActivityBulk CreateBulk(RootActivity activities, int requestnumber)
         {
             RootActivityBulk resultbulkactivity = new RootActivityBulk();
             string bulkactivity = JsonConvert.SerializeObject(activities, Formatting.None);
@@ -108,7 +148,8 @@ namespace skymigration
             {
                 attemps += 0;
                 resultbulkactivity = JsonConvert.DeserializeObject<RootActivityBulk>(result.Content);
-                Program.Logger(string.Format("|{0}|statusCode:{1}|Content:{2}|ErrorMessage:{3}|activities:{4}|", DateTime.Now, result.statusCode, result.Content, result.ErrorMessage, JsonConvert.SerializeObject(activities.activities, Formatting.None)), TypeLog.OK_REST_ACTIVITY);
+                // Horario ; status Code http ;Request ; Response ; 
+                Program.Logger(string.Format("{0};{1};{2};", DateTime.Now, result.statusCode, result.Content), TypeLog.OK_REST_ACTIVITY, requestnumber);
 
                 // Analyzing object
                 AnalyzingBulk(resultbulkactivity, activities);
@@ -120,14 +161,10 @@ namespace skymigration
                 attemps += 1;
                 Program.Logger(string.Format("|{0}|statusCode:{1}|Content:{2}|ErrorMessage:{3}|activities{4}|", DateTime.Now, result.statusCode, result.Content, result.ErrorMessage, bulkactivity), TypeLog.NSHTTPURLResponse);
                 Thread.Sleep(5000);
-                CreateBulk(activities);
+                CreateBulk(activities, requestnumber);
             }
 
-            // REQUEST BAD
-            //else 
-            //{
-            //    Program.Logger(string.Format("|{0}|activities:{1}|Content:{2}|", DateTime.Now, bulkactivity, result.Content), TypeLog.BAD_REST_ACTIVITY);
-            //}
+
             return resultbulkactivity;
         }
         public Activity Create(Activity activity)
@@ -173,12 +210,13 @@ namespace skymigration
         public List<Activity> GetFromCSV(string path)
         {
             List<string> listCSVLines = ReadCSV(path);
+            Console.WriteLine(string.Format("Archivo {0} contiene {1} a analizar", Path.GetFileName(path), listCSVLines.Count()));
             return FillList(listCSVLines);
         }
         private List<Activity> FillList(List<string> listCSVLines)
         {
             List<Activity> listActivity = new List<Activity>();
-
+            string simulatereflection = string.Empty;
             for (int i = 0; i < listCSVLines.Count; i++)
             {
                 if (i == 0)
@@ -193,20 +231,10 @@ namespace skymigration
                             throw new Exception("* La longitud minima es de 72 posiciones, linea en csv esta mal formada");
 
                         Activity activity = new Activity();
-
-
-
                         activity.apptNumber = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[0]);
                         activity.date = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[1]);
-
                         activity.resourceId = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[2]);
-                        activity.resourceId = string.IsNullOrEmpty(activity.resourceId) ? activity.resourceId : ConfigurationManager.AppSettings["resourceiddefault"].ToString();
-
-                        //activity.inventories = new Inventories();
-                        //activity.inventories.items = new List<Item>();
-                        // TODO 
-                        // ERASE BELOW LINE
-                        // activity.resourceId = "ESTEBANTEC2018";
+                        activity.resourceId = string.IsNullOrEmpty(activity.resourceId) ? ConfigurationManager.AppSettings["resourceiddefault"].ToString() : activity.resourceId;
                         activity.customerNumber = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[3]);
                         activity.activityType = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[4]);
                         activity.timeSlot = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[5]);
@@ -217,7 +245,9 @@ namespace skymigration
                         activity.streetAddress = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[10]);
                         activity.city = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[11]);
                         activity.country_code = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[12]);
+                        simulatereflection = "Actividad campo longitude ";
                         activity.longitude = string.IsNullOrEmpty(tmpExtractInfoforActivity[13]) ? 0 : float.Parse(tmpExtractInfoforActivity[13]);
+                        simulatereflection = "Actividad campo latitude ";
                         activity.latitude = string.IsNullOrEmpty(tmpExtractInfoforActivity[14]) ? 0 : float.Parse(tmpExtractInfoforActivity[14]);
                         activity.slaWindowStart = tmpExtractInfoforActivity[15];
                         activity.slaWindowEnd = tmpExtractInfoforActivity[16];
@@ -280,7 +310,7 @@ namespace skymigration
                         activity.XA_tipo_de_plazo = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[68]);
                         // TODO
                         // ANALIZAR ESTA PROPIEDAD CON CHRISTIAN
-                        // activity.XA_tipo_instalacion = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[69]);
+                        activity.XA_tipo_instalacion = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[69]);
                         activity.XA_id_instalador = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[70]);
                         activity.XA_mov_tipo_eq = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[71]);
                         activity.XA_red = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[72]);
@@ -299,6 +329,7 @@ namespace skymigration
                             item.XI_TI = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[75]);
                             item.XI_jerarquia = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[76]);
                             item.XI_estatus = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[77]);
+                            simulatereflection = "Inventario campo quantity ";
                             item.quantity = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[78]) == null ? 0 : int.Parse(tmpExtractInfoforActivity[78]);
                             item.XI_Marca = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[79]);
                             item.XI_Modelo = UtilWebRequest.IsNullOrEmpty(tmpExtractInfoforActivity[80]);
@@ -322,39 +353,10 @@ namespace skymigration
                     }
                     catch (Exception ex)
                     {
-                        Program.Logger(string.Format("|{0}|*Error al llenar el objecto Actividad,{1}|{2}|", DateTime.Now, ex.Message, listCSVLines[i]), TypeLog.BAD_IO_ACTIVITY);
+                        Program.Logger(string.Format("|{0}|*Error de información en  {1}, {2}|{3}|", DateTime.Now, simulatereflection, ex.Message, listCSVLines[i]), TypeLog.BAD_IO_ACTIVITY);
                     }
                 }
             }
-            // TODO
-            // pruebas de stress
-            //for (int i = 0; i < 1000000; i++)
-            //{
-            //    Activity activity = new Activity();
-            //    activity.activityId = listActivity[0].activityId;
-            //    activity.apptNumber = Guid.NewGuid().ToString();
-            //    activity.date =  listActivity[0].date;
-            //    activity.resourceId = listActivity[0].resourceId;
-            //    activity.customerNumber = listActivity[0].customerNumber;
-            //    activity.activityType = listActivity[0].activityType;
-            //    activity.timeSlot = listActivity[0].timeSlot;
-            //    activity.customerName = listActivity[0].customerName;
-            //    activity.customerPhone = listActivity[0].customerPhone;
-            //    activity.customerCell = listActivity[0].customerCell;
-            //    activity.customerEmail = listActivity[0].customerEmail;
-            //    activity.streetAddress = listActivity[0].streetAddress;
-            //    activity.city = listActivity[0].city;
-            //    activity.country_code = listActivity[0].country_code;
-            //    activity.longitude = listActivity[0].longitude;
-            //    activity.latitude = listActivity[0].latitude;
-            //    activity.slaWindowStart = listActivity[0].slaWindowStart;
-            //    activity.slaWindowEnd = listActivity[0].slaWindowEnd;
-            //    activity.postalCode = listActivity[0].postalCode;
-            //    activity.stateProvince = listActivity[0].stateProvince;
-            //    activity.points = listActivity[0].points;
-            //    listActivity.Add(activity);
-            //}
-
             return listActivity;
         }
         private List<string> ReadCSV(string path)
@@ -372,7 +374,7 @@ namespace skymigration
         {
             List<string> listResult = new List<string>();
 
-            using (var reader = new StreamReader(this.source, Encoding.UTF8, true))
+            using (var reader = new StreamReader(this.source, Encoding.GetEncoding("iso-8859-1")))
             {
                 while (!reader.EndOfStream)
                 {

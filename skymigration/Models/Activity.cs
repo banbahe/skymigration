@@ -187,8 +187,7 @@ namespace skymigration
         public string XA_saldo_penalizado { get; set; }
         public string XA_tipo_de_plazo { get; set; }
         // TODO
-        // si no existe ver como omitir este valor
-        // public string XA_tipo_instalacion { get; set; }
+        public string XA_tipo_instalacion { get; set; }
         public string XA_id_instalador { get; set; }
         public string XA_mov_tipo_eq { get; set; }
         public string XA_red { get; set; }

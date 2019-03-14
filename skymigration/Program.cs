@@ -5,6 +5,8 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.IO;
+using System.Text;
 
 namespace skymigration
 {
@@ -50,32 +52,15 @@ namespace skymigration
 
         static void Main(string[] args)
         {
-            // ************************************************
-            // TEST
-            // MyDerivedClass myDerivedClass = new MyDerivedClass();
-            // myDerivedClass.Name = "Esteban Blanquel";
-            // myDerivedClass.Number = 9;
-            // string bulkactivity = JsonConvert.SerializeObject(myDerivedClass, Formatting.None);
-
-            // MyBaseClass myBaseClass = new MyBaseClass();
-            // myBaseClass.Name = "valor null";
-            // myBaseClass.Number = null;
-            // string bulkactivity = JsonConvert.SerializeObject(myBaseClass, Formatting.None,new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore});
-
-            // *************************************************
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(" Procesando actividades ");
             int countactivities = 0;
             Program.Logger(string.Format("************************************************************"), TypeLog.DEFAULT);
             Program.Logger(string.Format(" Inicia proceso {0} ", DateTime.Now), TypeLog.DEFAULT);
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             List<Activity> list = ctrlActivity.GetFromCSV(CurrentFilePath);
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(" Procesando actividades ");
-
-            // DISTINCT LIST FOR apptNumber
-            // var tmplist = list.Distinct(new ItemEqualityComparer());
-            // var tmplist = list;
-
+            
             RootActivity activities = new RootActivity();
             activities.activities = new List<Activity>();
             activities.activities = list;
@@ -84,7 +69,7 @@ namespace skymigration
             activities.updateParameters.identifyActivityBy = "apptNumber";
             activities.updateParameters.ifInFinalStatusThen = "createNew";
 
-         
+
             int maxcountrequest = 500;
             double numberrequest = Math.Floor((double)activities.activities.Count / maxcountrequest);
             numberrequest = numberrequest == 0 ? 1 : numberrequest;
@@ -101,7 +86,7 @@ namespace skymigration
                 activities2.updateParameters = new UpdateParameters();
                 activities2.updateParameters.identifyActivityBy = "apptNumber";
                 activities2.updateParameters.ifInFinalStatusThen = "createNew";
-                ctrlActivity.CreateBulk(activities2);
+                ctrlActivity.CreateBulk(activities2, i);
             }
             stopwatch.Stop();
             string sMessageEnd = string.Format(" Se procesaron {0} actividades en {1} segundos, el tiempo estimado por creación de actividad es de {2}", countactivities, stopwatch.Elapsed.TotalSeconds, (stopwatch.Elapsed.TotalSeconds / countactivities));
@@ -120,7 +105,7 @@ namespace skymigration
         /// </summary>
         /// <param name="lines"></param>
         /// <param name="opcion"></param>
-        public static void Logger(String lines, TypeLog typeLog)
+        public static void Logger(String lines, TypeLog typeLog, int requestnumber = 0)
         {
             string @sPath = System.IO.Path.GetDirectoryName(CurrentFilePath);
 
@@ -133,7 +118,10 @@ namespace skymigration
                         temppath = @sPath + "\\log_NSHTTPURLResponse.txt";
                         break;
                     case TypeLog.OK_REST_ACTIVITY:
-                        temppath = @sPath + "\\log_request.txt";
+                        temppath = @sPath + "\\log_request\\log_" + requestnumber + ".txt";
+                        if (!Directory.Exists(Path.GetDirectoryName(temppath)))
+                            Directory.CreateDirectory(Path.GetDirectoryName(temppath));
+
                         break;
                     case TypeLog.BAD_REST_ACTIVITY:
                         temppath = @sPath + "\\log_bad_request.txt";
@@ -145,7 +133,8 @@ namespace skymigration
                         temppath = @sPath + "\\log.txt";
                         break;
                 }
-                System.IO.StreamWriter file = new System.IO.StreamWriter(temppath, true);
+
+                System.IO.StreamWriter file = new System.IO.StreamWriter(temppath, true, Encoding.GetEncoding("iso-8859-1"));
                 file.WriteLine(lines);
                 file.Close();
             }
@@ -166,7 +155,7 @@ namespace skymigration
                 string temppath = string.Empty;
                 string tmpDate = DateTime.Now.ToString("yyyy-MM-dd");
                 temppath = @sPath + "\\layout_output_" + tmpDate + ".csv";
-                System.IO.StreamWriter file = new System.IO.StreamWriter(temppath, true);
+                System.IO.StreamWriter file = new System.IO.StreamWriter(temppath, true, Encoding.GetEncoding("iso-8859-1"));
                 file.WriteLine(lines);
                 file.Close();
             }
